@@ -21,6 +21,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -554,7 +556,13 @@ public class ZohoService {
             throw new BadRequestException("Zoho organization ID not found in integration configuration.");
         }
 
-        String url = "https://www.zohoapis.in/books/v3/reports/profitandloss?organization_id=" + organizationId;
+        LocalDate endDate = LocalDate.now();
+        LocalDate startDate = endDate.minusMonths(1);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+        String url = "https://www.zohoapis.in/books/v3/reports/profitandloss?organization_id=" + organizationId +
+                     "&date_start=" + startDate.format(formatter) +
+                     "&date_end=" + endDate.format(formatter);
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Zoho-oauthtoken " + integration.getAccessToken());
