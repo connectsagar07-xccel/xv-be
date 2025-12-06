@@ -113,7 +113,7 @@ public class DashboardService {
         double arpu = totalCustomerCount > 0 ? lastMonthRevenue / totalCustomerCount : 0.0;
 
         // Gross Margin %
-        JsonNode pnlReport = zohoService.fetchProfitAndLossReport(founderEmail);
+        JsonNode pnlReport = zohoService.fetchProfitAndLossReport(founderEmail, null, null);
         double grossMarginPercent = calculateGrossMargin(pnlReport);
 
         // Average Customer Lifespan (Months)

@@ -547,14 +547,25 @@ public class ZohoService {
         }
     }
 
-    public JsonNode fetchProfitAndLossReport(String founderEmail) {
+    public JsonNode fetchProfitAndLossReport(String founderEmail, String fromDate, String toDate) {
         Integration integration = getIntegrationOrThrow(founderEmail);
         String organizationId = extractOrganizationId(integration);
         if (organizationId == null) {
             throw new BadRequestException("Zoho organization ID not found in integration configuration.");
         }
 
-        String url = "https://www.zohoapis.in/books/v3/reports/profitandloss?organization_id=" + organizationId;
+        StringBuilder urlBuilder = new StringBuilder("https://www.zohoapis.in/books/v3/reports/profitandloss");
+        urlBuilder.append("?organization_id=").append(organizationId);
+
+        if (fromDate == null || fromDate.isBlank()) {
+            fromDate = java.time.LocalDate.now().minusMonths(1).toString();
+        }
+        if (toDate == null || toDate.isBlank()) {
+            toDate = java.time.LocalDate.now().toString();
+        }
+
+        urlBuilder.append("&from_date=").append(fromDate);
+        urlBuilder.append("&to_date=").append(toDate);
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Zoho-oauthtoken " + integration.getAccessToken());
@@ -562,7 +573,7 @@ public class ZohoService {
         HttpEntity<Void> entity = new HttpEntity<>(headers);
 
         try {
-            ResponseEntity<String> resp = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
+            ResponseEntity<String> resp = restTemplate.exchange(urlBuilder.toString(), HttpMethod.GET, entity, String.class);
 
             if (!resp.getStatusCode().is2xxSuccessful()) {
                 throw new RuntimeException("Zoho API returned " + resp.getStatusCodeValue() + ": " + resp.getBody());
