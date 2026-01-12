@@ -12,7 +12,8 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 /**
- * Full investor information including user, investor profile, and mapping details.
+ * Full investor information including user, investor profile, and mapping
+ * details.
  */
 @Data
 @Builder
@@ -38,4 +39,9 @@ public class InvestorFullResponse {
     private String mappingId;
     private InvestorRole investorRole;
     private MappingStatus status;
+
+    // 💰 Investment Details
+    private Double ownershipPercentage;
+    private Double totalInvestedAmount;
+    private String investedAt;
 }

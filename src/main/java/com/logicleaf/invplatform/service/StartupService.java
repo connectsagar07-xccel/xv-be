@@ -20,6 +20,7 @@ public class StartupService {
         private final StartupRepository startupRepository;
         private final InvestorRepository investorRepository;
         private final StartupInvestorMappingRepository mappingRepository;
+        private final InvestmentRepository investmentRepository;
 
         /**
          * Get all ACTIVE investors of a founder's startup with full joined data (user +
@@ -83,14 +84,46 @@ public class StartupService {
                                                         .mappingId(mapping.getId())
                                                         .investorRole(mapping.getInvestorRole())
                                                         .status(mapping.getStatus())
+                                                        // investment info
+                                                        .ownershipPercentage(getOwnershipPercentage(investor.getId(),
+                                                                        startup.getId()))
+                                                        .totalInvestedAmount(getTotalInvestedAmount(investor.getId(),
+                                                                        startup.getId()))
+                                                        .investedAt(getInvestedAt(investor.getId(), startup.getId()))
                                                         .build();
                                 })
                                 .collect(Collectors.toList());
         }
 
+        private Double getOwnershipPercentage(String investorId, String startupId) {
+                return investmentRepository.findByInvestorIdAndStartupId(investorId, startupId)
+                                .map(Investment::getOwnershipPercentage)
+                                .orElse(0.0);
+        }
+
+        private Double getTotalInvestedAmount(String investorId, String startupId) {
+                return investmentRepository.findByInvestorIdAndStartupId(investorId, startupId)
+                                .map(Investment::getTotalInvestedAmount)
+                                .orElse(0.0);
+        }
+
+        private String getInvestedAt(String investorId, String startupId) {
+                return investmentRepository.findByInvestorIdAndStartupId(investorId, startupId)
+                                .map(inv -> {
+                                        if (inv.getCreatedAt() != null) {
+                                                return java.time.format.DateTimeFormatter.ofPattern("dd-MM-yyyy")
+                                                                .withZone(java.time.ZoneId.systemDefault())
+                                                                .format(inv.getCreatedAt());
+                                        }
+                                        return null;
+                                })
+                                .orElse(null);
+        }
+
         public Startup getStartupByFounderEmail(String founderEmail) {
                 User user = userRepository.findByEmail(founderEmail)
-                                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + founderEmail));
+                                .orElseThrow(() -> new ResourceNotFoundException(
+                                                "User not found with email: " + founderEmail));
 
                 return startupRepository.findByFounderUserId(user.getId())
                                 .orElseThrow(() -> new ResourceNotFoundException(

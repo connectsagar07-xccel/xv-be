@@ -1,8 +1,6 @@
 package com.logicleaf.invplatform.controller;
 
 import com.logicleaf.invplatform.dto.InvestmentRequestDTO;
-import com.logicleaf.invplatform.dto.PortfolioCompanyDTO;
-import com.logicleaf.invplatform.dto.PortfolioDashboardDTO;
 import com.logicleaf.invplatform.model.Investor;
 import com.logicleaf.invplatform.security.CustomUserDetails;
 import com.logicleaf.invplatform.service.InvestmentService;
@@ -13,7 +11,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/investor/investments")
@@ -26,27 +25,44 @@ public class InvestmentController {
     private final InvestorService investorService;
 
     @PostMapping
-    public ResponseEntity<Void> addInvestment(@AuthenticationPrincipal CustomUserDetails userDetails,
+    public ResponseEntity<?> addInvestment(@AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody InvestmentRequestDTO request) {
         String userId = userDetails.getUser().getId();
         Investor investor = investorService.findByUserId(userId);
         investmentService.addInvestment(investor.getId(), request);
-        return ResponseEntity.ok().build();
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("status", "success");
+        response.put("message", "Investment added successfully.");
+
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping
-    public ResponseEntity<List<PortfolioCompanyDTO>> getPortfolio(
+    public ResponseEntity<?> getPortfolio(
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         String userId = userDetails.getUser().getId();
         Investor investor = investorService.findByUserId(userId);
-        return ResponseEntity.ok(investmentService.getPortfolio(investor.getId()));
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("status", "success");
+        response.put("message", "Portfolio fetched successfully.");
+        response.put("data", investmentService.getPortfolio(investor.getId()));
+
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/dashboard")
-    public ResponseEntity<PortfolioDashboardDTO> getDashboardMetrics(
+    public ResponseEntity<?> getDashboardMetrics(
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         String userId = userDetails.getUser().getId();
         Investor investor = investorService.findByUserId(userId);
-        return ResponseEntity.ok(investmentService.getDashboardMetrics(investor.getId()));
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("status", "success");
+        response.put("message", "Dashboard metrics fetched successfully.");
+        response.put("data", investmentService.getDashboardMetrics(investor.getId()));
+
+        return ResponseEntity.ok(response);
     }
 }

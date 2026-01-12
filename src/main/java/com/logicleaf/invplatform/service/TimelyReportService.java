@@ -60,13 +60,13 @@ public class TimelyReportService {
         report.setCreatedAt(System.currentTimeMillis());
         report.setUpdatedAt(System.currentTimeMillis());
 
-        TimelyReport savedReport = timelyReportRepository.save(report);
-
         // ✅ Generate PDF report
-        byte[] pdfBytes = pdfGeneratorService.generateTimelyReportPdf(savedReport, startup.getStartupName());
+        byte[] pdfBytes = pdfGeneratorService.generateTimelyReportPdf(report, startup.getStartupName());
 
         TimelyReportAttachment pdfAttachment = savePdfAttachment(pdfBytes, report.getTitle(), startup.getStartupName());
         report.setReportPdf(pdfAttachment);
+
+        TimelyReport savedReport = timelyReportRepository.save(report);
 
         // ✅ Send to investors
         if (!report.isDraftReport()) {

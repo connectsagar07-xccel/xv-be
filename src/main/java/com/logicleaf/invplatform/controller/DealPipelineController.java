@@ -1,7 +1,5 @@
 package com.logicleaf.invplatform.controller;
 
-import com.logicleaf.invplatform.dto.DealPipelineDTO;
-import com.logicleaf.invplatform.dto.DealPipelineDashboardDTO;
 import com.logicleaf.invplatform.dto.DealPipelineRequestDTO;
 import com.logicleaf.invplatform.model.Investor;
 import com.logicleaf.invplatform.security.CustomUserDetails;
@@ -13,7 +11,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.util.HashMap;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/investor/deal-pipeline")
@@ -26,39 +26,67 @@ public class DealPipelineController {
     private final InvestorService investorService;
 
     @GetMapping
-    public ResponseEntity<List<DealPipelineDTO>> getPipeline(@AuthenticationPrincipal CustomUserDetails userDetails,
+    public ResponseEntity<?> getPipeline(@AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam(required = false) com.logicleaf.invplatform.model.DealStatus filter) {
         String userId = userDetails.getUser().getId();
         Investor investor = investorService.findByUserId(userId);
-        return ResponseEntity.ok(dealPipelineService.getPipelineForInvestor(investor.getId(), filter));
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("status", "success");
+        response.put("message", "Deal pipeline fetched successfully.");
+        response.put("data", dealPipelineService.getPipelineForInvestor(investor.getId(), filter));
+
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping
-    public ResponseEntity<DealPipelineDTO> addToPipeline(@AuthenticationPrincipal CustomUserDetails userDetails,
+    public ResponseEntity<?> addToPipeline(@AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody DealPipelineRequestDTO request) {
         String userId = userDetails.getUser().getId();
         Investor investor = investorService.findByUserId(userId);
         request.setInvestorId(investor.getId());
-        return ResponseEntity.ok(dealPipelineService.addToPipeline(request));
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("status", "success");
+        response.put("message", "Deal added to pipeline successfully.");
+        response.put("data", dealPipelineService.addToPipeline(request));
+
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<DealPipelineDTO> updatePipeline(@PathVariable String id,
+    public ResponseEntity<?> updatePipeline(@PathVariable String id,
             @RequestBody DealPipelineRequestDTO request) {
-        return ResponseEntity.ok(dealPipelineService.updatePipeline(id, request));
+        Map<String, Object> response = new HashMap<>();
+        response.put("status", "success");
+        response.put("message", "Deal pipeline updated successfully.");
+        response.put("data", dealPipelineService.updatePipeline(id, request));
+
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/dashboard")
-    public ResponseEntity<DealPipelineDashboardDTO> getDashboardMetrics(
+    public ResponseEntity<?> getDashboardMetrics(
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         String userId = userDetails.getUser().getId();
         Investor investor = investorService.findByUserId(userId);
-        return ResponseEntity.ok(dealPipelineService.getDashboardMetrics(investor.getId()));
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("status", "success");
+        response.put("message", "Dashboard metrics fetched successfully.");
+        response.put("data", dealPipelineService.getDashboardMetrics(investor.getId()));
+
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> removeFromPipeline(@PathVariable String id) {
+    public ResponseEntity<?> removeFromPipeline(@PathVariable String id) {
         dealPipelineService.removeFromPipeline(id);
-        return ResponseEntity.noContent().build();
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("status", "success");
+        response.put("message", "Deal removed from pipeline successfully.");
+
+        return ResponseEntity.ok(response);
     }
 }
