@@ -35,7 +35,6 @@ public class OnboardingService {
 
         Startup startup = Startup.builder()
                 .founderUserId(user.getId())
-                .companyName(request.getCompanyName())
                 .startupName(request.getStartupName())
                 .sector(request.getSector())
                 .stage(request.getStage())
@@ -43,6 +42,7 @@ public class OnboardingService {
                 .hqLocation(request.getHqLocation())
                 .teamSize(request.getTeamSize())
                 .website(request.getWebsite())
+                .valuation(request.getValuation())
                 .build();
 
         Startup saved = startupRepository.save(startup);

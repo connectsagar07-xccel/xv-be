@@ -7,8 +7,6 @@ import lombok.Data;
 
 @Data
 public class FounderProfileRequest {
-    @NotBlank
-    private String companyName;
 
     @NotBlank
     private String startupName;
@@ -29,4 +27,6 @@ public class FounderProfileRequest {
     private Integer teamSize;
 
     private String website;
+
+    private Double valuation;
 }

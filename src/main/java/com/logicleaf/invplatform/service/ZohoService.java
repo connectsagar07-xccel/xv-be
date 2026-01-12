@@ -15,12 +15,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.time.LocalDateTime;
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -493,6 +496,252 @@ public class ZohoService {
         } catch (Exception e) {
             logger.error("❌ Error fetching bank account details for {}: {}", founderEmail, e.getMessage());
             throw new RuntimeException("Failed to fetch bank account details: " + e.getMessage(), e);
+        }
+    }
+
+    public JsonNode fetchContactsFromZoho(
+            String founderEmail,
+            Map<String, String> filters // dynamic filters
+    ) {
+
+        User user = userRepository.findByEmail(founderEmail)
+                .orElseThrow(() -> new RuntimeException("User not found: " + founderEmail));
+
+        Startup startup = startupRepository.findByFounderUserId(user.getId())
+                .orElseThrow(() -> new RuntimeException("Startup not found for user: " + founderEmail));
+
+        Integration integration = integrationRepository.findByStartupIdAndIntegrationType(
+                startup.getId(), IntegrationType.ZOHO);
+
+        if (integration == null || integration.getAccessToken() == null) {
+            throw new RuntimeException("Zoho integration not connected for this startup.");
+        }
+
+        ensureValidToken(integration);
+
+        String organizationId = extractOrganizationId(integration);
+        if (organizationId == null) {
+            throw new RuntimeException("Zoho organization ID not found in integration config.");
+        }
+
+        // ---------- Build Query Params ----------
+        UriComponentsBuilder builder = UriComponentsBuilder
+                .fromHttpUrl("https://www.zohoapis.in/books/v3/contacts")
+                .queryParam("organization_id", organizationId);
+
+        if (filters != null) {
+            for (Map.Entry<String, String> entry : filters.entrySet()) {
+                if (entry.getValue() != null && !entry.getValue().isEmpty()) {
+                    builder.queryParam(entry.getKey(), entry.getValue());
+                }
+            }
+        }
+
+        String finalUrl = builder.toUriString();
+        logger.info(" Fetching Zoho contacts with URL: {}", finalUrl);
+
+        // ---------- Headers ----------
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Zoho-oauthtoken " + integration.getAccessToken());
+        headers.set("Accept", "application/json");
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+        try {
+            ResponseEntity<String> resp = restTemplate.exchange(finalUrl, HttpMethod.GET, entity, String.class);
+
+            if (!resp.getStatusCode().is2xxSuccessful()) {
+                throw new RuntimeException("Zoho API returned " + resp.getStatusCodeValue() + ": " + resp.getBody());
+            }
+
+            logger.info(" Contacts fetched successfully from Zoho for startupId: {}", startup.getId());
+            return objectMapper.readTree(resp.getBody());
+
+        } catch (Exception e) {
+            logger.error(" Error fetching Zoho contacts for {}: {}", founderEmail, e.getMessage());
+            throw new RuntimeException("Failed to fetch Zoho contacts: " + e.getMessage(), e);
+        }
+    }
+
+    public JsonNode fetchInvoicesFromZoho(String founderEmail, Map<String, String> filters) {
+
+        User user = userRepository.findByEmail(founderEmail)
+                .orElseThrow(() -> new RuntimeException("User not found: " + founderEmail));
+
+        Startup startup = startupRepository.findByFounderUserId(user.getId())
+                .orElseThrow(() -> new RuntimeException("Startup not found for user: " + founderEmail));
+
+        Integration integration = integrationRepository.findByStartupIdAndIntegrationType(
+                startup.getId(), IntegrationType.ZOHO);
+
+        if (integration == null || integration.getAccessToken() == null) {
+            throw new RuntimeException("Zoho integration not connected for this startup.");
+        }
+
+        ensureValidToken(integration);
+
+        String organizationId = extractOrganizationId(integration);
+        if (organizationId == null) {
+            throw new RuntimeException("Zoho organization ID not found in integration config.");
+        }
+
+        // -------- Build URL with dynamic filters --------
+        UriComponentsBuilder builder = UriComponentsBuilder
+                .fromHttpUrl("https://www.zohoapis.in/books/v3/invoices")
+                .queryParam("organization_id", organizationId);
+
+        if (filters != null) {
+            for (Map.Entry<String, String> entry : filters.entrySet()) {
+                if (entry.getValue() != null && !entry.getValue().isEmpty()) {
+                    builder.queryParam(entry.getKey(), entry.getValue());
+                }
+            }
+        }
+
+        String finalUrl = builder.toUriString();
+        logger.info(" Fetching Zoho invoices with URL: {}", finalUrl);
+
+        // -------- Headers --------
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Zoho-oauthtoken " + integration.getAccessToken());
+        headers.set("Accept", "application/json");
+
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+        try {
+
+            ResponseEntity<String> resp = restTemplate.exchange(finalUrl, HttpMethod.GET, entity, String.class);
+
+            if (!resp.getStatusCode().is2xxSuccessful()) {
+                throw new RuntimeException("Zoho API returned " + resp.getStatusCodeValue() + ": " + resp.getBody());
+            }
+
+            logger.info(" Invoices fetched successfully for startupId: {}", startup.getId());
+            return objectMapper.readTree(resp.getBody());
+
+        } catch (Exception e) {
+            logger.error(" Error fetching Zoho invoices for {}: {}", founderEmail, e.getMessage());
+            throw new RuntimeException("Failed to fetch invoices from Zoho: " + e.getMessage(), e);
+        }
+    }
+
+    public JsonNode fetchProfitAndLossReport(
+            String founderEmail,
+            String fromDate,
+            String toDate) {
+
+        User user = userRepository.findByEmail(founderEmail)
+                .orElseThrow(() -> new RuntimeException("User not found: " + founderEmail));
+
+        Startup startup = startupRepository.findByFounderUserId(user.getId())
+                .orElseThrow(() -> new RuntimeException("Startup not found for user: " + founderEmail));
+
+        Integration integration = integrationRepository.findByStartupIdAndIntegrationType(
+                startup.getId(), IntegrationType.ZOHO);
+
+        if (integration == null || integration.getAccessToken() == null) {
+            throw new RuntimeException("Zoho integration not connected for this startup.");
+        }
+
+        ensureValidToken(integration);
+
+        String organizationId = extractOrganizationId(integration);
+        if (organizationId == null) {
+            throw new RuntimeException("Zoho organization ID not found in integration config.");
+        }
+
+        // ---------------- Build URL ----------------
+        UriComponentsBuilder builder = UriComponentsBuilder
+                .fromHttpUrl("https://www.zohoapis.in/books/v3/reports/profitandloss")
+                .queryParam("organization_id", organizationId)
+                .queryParam("from_date", fromDate)
+                .queryParam("to_date", toDate);
+
+        String finalUrl = builder.toUriString();
+        logger.info("Fetching Profit & Loss Report from Zoho: {}", finalUrl);
+
+        // ---------------- Headers ----------------
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Zoho-oauthtoken " + integration.getAccessToken());
+        headers.set("Accept", "application/json");
+
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+        try {
+            ResponseEntity<String> resp = restTemplate.exchange(
+                    finalUrl, HttpMethod.GET, entity, String.class);
+
+            if (!resp.getStatusCode().is2xxSuccessful()) {
+                throw new RuntimeException(
+                        "Zoho API returned " + resp.getStatusCodeValue() + ": " + resp.getBody());
+            }
+
+            logger.info("Profit & Loss Report fetched successfully for startupId: {}", startup.getId());
+            return objectMapper.readTree(resp.getBody());
+
+        } catch (Exception e) {
+            logger.error("Error fetching Profit & Loss report for {}: {}", founderEmail, e.getMessage());
+            throw new RuntimeException("Failed to fetch P&L report: " + e.getMessage(), e);
+        }
+    }
+
+    public JsonNode fetchRecurringInvoicesFromZoho(String founderEmail, Map<String, String> filters) {
+
+        User user = userRepository.findByEmail(founderEmail)
+                .orElseThrow(() -> new RuntimeException("User not found: " + founderEmail));
+
+        Startup startup = startupRepository.findByFounderUserId(user.getId())
+                .orElseThrow(() -> new RuntimeException("Startup not found for user: " + founderEmail));
+
+        Integration integration = integrationRepository.findByStartupIdAndIntegrationType(
+                startup.getId(), IntegrationType.ZOHO);
+
+        if (integration == null || integration.getAccessToken() == null) {
+            throw new RuntimeException("Zoho integration not connected for this startup.");
+        }
+
+        ensureValidToken(integration);
+
+        String organizationId = extractOrganizationId(integration);
+        if (organizationId == null) {
+            throw new RuntimeException("Zoho organization ID not found in integration config.");
+        }
+
+        // ---------- Build URL ----------
+        UriComponentsBuilder builder = UriComponentsBuilder
+                .fromHttpUrl("https://www.zohoapis.in/books/v3/recurringinvoices")
+                .queryParam("organization_id", organizationId);
+
+        if (filters != null) {
+            for (Map.Entry<String, String> entry : filters.entrySet()) {
+                if (entry.getValue() != null && !entry.getValue().isEmpty()) {
+                    builder.queryParam(entry.getKey(), entry.getValue());
+                }
+            }
+        }
+
+        String finalUrl = builder.toUriString();
+        logger.info("Fetching Zoho Recurring Invoices with URL: {}", finalUrl);
+
+        // ---------- Headers ----------
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Zoho-oauthtoken " + integration.getAccessToken());
+        headers.set("Accept", "application/json");
+
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+        try {
+            ResponseEntity<String> resp = restTemplate.exchange(finalUrl, HttpMethod.GET, entity, String.class);
+
+            if (!resp.getStatusCode().is2xxSuccessful()) {
+                throw new RuntimeException("Zoho API returned " + resp.getStatusCodeValue() + ": " + resp.getBody());
+            }
+
+            logger.info("Recurring invoices fetched successfully for startupId: {}", startup.getId());
+            return objectMapper.readTree(resp.getBody());
+
+        } catch (Exception e) {
+            logger.error("Error fetching recurring invoices for {}: {}", founderEmail, e.getMessage());
+            throw new RuntimeException("Failed to fetch recurring invoices from Zoho: " + e.getMessage(), e);
         }
     }
 

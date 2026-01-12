@@ -12,7 +12,6 @@ import java.util.Map;
 public class PortfolioStartupSummary {
     private String startupId;
     private String startupName;
-    private String companyName;
     private Map<String, String> latestMetrics; // e.g., { "Revenue": "10000", "Burn": "5000" }
     private List<Report> recentReports;
 }

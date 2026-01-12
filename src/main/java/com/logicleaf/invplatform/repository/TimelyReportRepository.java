@@ -10,6 +10,12 @@ import java.util.Optional;
 @Repository
 public interface TimelyReportRepository extends MongoRepository<TimelyReport, String> {
     List<TimelyReport> findByFounderUserId(String founderUserId);
+
     boolean existsByStartupIdAndDraftReportTrue(String startupId);
+
     Optional<TimelyReport> findByStartupIdAndDraftReportTrue(String startupId);
+
+    Optional<TimelyReport> findFirstByStartupIdOrderByCreatedAtDesc(String startupId);
+
+    List<TimelyReport> findByStartupIdOrderByCreatedAtDesc(String startupId);
 }

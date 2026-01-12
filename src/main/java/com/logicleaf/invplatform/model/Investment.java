@@ -15,30 +15,21 @@ import java.time.Instant;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Document(collection = "startups")
-public class Startup {
+@Document(collection = "investments")
+public class Investment {
+
     @Id
     private String id;
-    private String founderUserId;
-    private String startupName;
-    private Sector sector;
-    private String stage;
-    private Double fundingRaised;
-    private String hqLocation;
-    private Integer teamSize;
-    private String website;
 
-    private Double valuation;
+    private String investorId;
+    private String startupId;
+
+    private Double totalInvestedAmount;
+    private Double ownershipPercentage;
 
     @CreatedDate
     private Instant createdAt;
 
     @LastModifiedDate
     private Instant updatedAt;
-
-    // Zoho Integration Fields
-    // private String zohoAccessToken;
-    // private String zohoRefreshToken;
-    // private String zohoOrganizationId;
-    // private java.time.LocalDateTime zohoTokenExpiryTime;
 }
