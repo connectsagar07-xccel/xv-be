@@ -8,9 +8,16 @@ import java.util.Optional;
 
 public interface StartupInvestorMappingRepository extends MongoRepository<StartupInvestorMapping, String> {
     List<StartupInvestorMapping> findByStartupId(String startupId);
+
     List<StartupInvestorMapping> findByInvestorId(String investorId);
+
     Optional<StartupInvestorMapping> findByStartupIdAndInvestorId(String startupId, String investorId);
+
     List<StartupInvestorMapping> findByStartupIdAndStatus(String startupId, MappingStatus status);
+
     Optional<StartupInvestorMapping> findByStartupIdAndInvestorEmail(String startupId, String investorEmail);
+
     Optional<StartupInvestorMapping> findByIdAndInvestorEmail(String id, String investorEmail);
+
+    List<StartupInvestorMapping> findByInvestorEmail(String investorEmail);
 }

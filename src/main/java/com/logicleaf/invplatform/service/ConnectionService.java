@@ -176,7 +176,6 @@ public class ConnectionService {
                 Startup startup = startupRepository.findById(m.getStartupId())
                                 .orElseThrow(() -> new ResourceNotFoundException("Startup not found."));
 
-
                 User founderUser = userRepository.findById(startup.getFounderUserId())
                                 .orElseThrow(() -> new ResourceNotFoundException("Founder user not found."));
 
@@ -259,4 +258,5 @@ public class ConnectionService {
 
                 mappingRepository.deleteById(mappingId);
         }
+
 }
