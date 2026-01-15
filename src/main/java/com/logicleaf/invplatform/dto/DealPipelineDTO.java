@@ -23,4 +23,5 @@ public class DealPipelineDTO {
     private DealStatus dealStatus;
     private String status;
     private String lastActivity;
+    private Integer teamSize;
 }

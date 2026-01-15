@@ -139,12 +139,14 @@ public class DealPipelineService {
     private DealPipelineDTO mapToDTO(DealPipeline pipeline, Startup startup) {
         String lastActivity = "N/A";
         String valuation = "N/A";
+        Integer teamSize = null;
 
         if (startup != null) {
             // Get valuation
             if (startup.getValuation() != null) {
                 valuation = "₹" + startup.getValuation();
             }
+            teamSize = startup.getTeamSize();
 
             // Get last activity
             Long lastActivityTime = null;
@@ -169,7 +171,8 @@ public class DealPipelineService {
                 .status("Hot")
                 .dealStatus(pipeline.getStatus())
                 .valuation(valuation)
-                .lastActivity(lastActivity);
+                .lastActivity(lastActivity)
+                .teamSize(teamSize);
 
         if (startup != null) {
             builder.startupName(startup.getStartupName())

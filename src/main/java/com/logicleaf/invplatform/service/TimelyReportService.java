@@ -25,6 +25,8 @@ public class TimelyReportService {
     private final MailService mailService;
     private final InvestorService investorService;
 
+    private final StartupActivityService startupActivityService;
+
     @Autowired
     private PdfGeneratorService pdfGeneratorService;
 
@@ -67,6 +69,12 @@ public class TimelyReportService {
         report.setReportPdf(pdfAttachment);
 
         TimelyReport savedReport = timelyReportRepository.save(report);
+
+        // ✅ Update latest startup activity
+        if (!report.isDraftReport()) {
+            startupActivityService.upsertActivity(startup.getId(), startup.getStartupName(),
+                    "Published Quarterly Report: " + report.getTitle());
+        }
 
         // ✅ Send to investors
         if (!report.isDraftReport()) {
@@ -214,6 +222,12 @@ public class TimelyReportService {
                 startup.getStartupName());
         savedReport.setReportPdf(pdfAttachment);
         timelyReportRepository.save(savedReport);
+
+        // ✅ Update latest startup activity
+        if (!savedReport.isDraftReport()) {
+            startupActivityService.upsertActivity(startup.getId(), startup.getStartupName(),
+                    "Timely Report Updated: " + savedReport.getTitle());
+        }
 
         // ✅ Optional: send updated PDF to investors (if not draft)
         if (!savedReport.isDraftReport() && savedReport.getInvestorUserIds() != null) {
