@@ -28,4 +28,5 @@ public class PortfolioCompanyDTO {
     private Double valuationAtInvestment;
     private String investmentNotes;
     private String investmentLastUpdate;
+    private Boolean isActive;
 }

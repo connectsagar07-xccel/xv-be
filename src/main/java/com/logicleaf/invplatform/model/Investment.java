@@ -32,6 +32,7 @@ public class Investment {
     private java.time.LocalDate investmentDate;
     private Double valuationAtInvestment;
     private String notes;
+    private Boolean isActive;
 
     @CreatedDate
     private Instant createdAt;

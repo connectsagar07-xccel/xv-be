@@ -19,4 +19,5 @@ public class InvestmentRequestDTO {
     private java.time.LocalDate investmentDate;
     private Double valuationAtInvestment;
     private String notes;
+    private Boolean isActive;
 }

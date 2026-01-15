@@ -60,6 +60,7 @@ public class InvestmentService {
             investment.setInvestmentDate(request.getInvestmentDate());
             investment.setValuationAtInvestment(request.getValuationAtInvestment());
             investment.setNotes(request.getNotes());
+            investment.setIsActive(request.getIsActive());
         } else {
             investment = Investment.builder()
                     .investorId(investorId)
@@ -71,6 +72,7 @@ public class InvestmentService {
                     .investmentDate(request.getInvestmentDate())
                     .valuationAtInvestment(request.getValuationAtInvestment())
                     .notes(request.getNotes())
+                    .isActive(request.getIsActive())
                     .build();
         }
 
@@ -136,6 +138,7 @@ public class InvestmentService {
                     .valuationAtInvestment(round(investment.getValuationAtInvestment()))
                     .investmentNotes(investment.getNotes())
                     .investmentLastUpdate(lastUpdate)
+                    .isActive(investment.getIsActive())
                     .build();
         }).filter(java.util.Objects::nonNull).collect(Collectors.toList());
     }
