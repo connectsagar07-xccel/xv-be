@@ -10,21 +10,22 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PortfolioCompanyDTO {
+    // Startup Data
     private String startupId;
     private String startupName;
-    private String industry;
-    private Integer teamSize;
-    private String foundedYear; // Derived from createdAt or added to Startup if needed. Using createdAt year
-                                // for now.
-    private String stage;
-    private String status; // Active, Exited, etc. Hardcoded to "Active" for now.
+    private String startupIndustry;
+    private Integer startupTeamSize;
+    private String startupFoundedYear;
+    private Double startupMrr;
+    private Double startupGrowthPercentage;
 
+    // Investment Data
     private Double investmentAmount;
-    private Double ownershipPercentage;
-
-    private Double valuation;
-    private Double mrr;
-    private Double growthPercentage;
-
-    private String lastUpdate;
+    private Double investmentOwnershipPercentage;
+    private String investmentCurrency;
+    private String investmentStage;
+    private java.time.LocalDate investmentDate;
+    private Double valuationAtInvestment;
+    private String investmentNotes;
+    private String investmentLastUpdate;
 }

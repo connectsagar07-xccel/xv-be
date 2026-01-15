@@ -55,12 +55,22 @@ public class InvestmentService {
             investment = existingInvestment.get();
             investment.setTotalInvestedAmount(investment.getTotalInvestedAmount() + request.getAmount());
             investment.setOwnershipPercentage(request.getOwnershipPercentage()); // Overwrite ownership
+            investment.setCurrency(request.getCurrency());
+            investment.setStage(request.getStage());
+            investment.setInvestmentDate(request.getInvestmentDate());
+            investment.setValuationAtInvestment(request.getValuationAtInvestment());
+            investment.setNotes(request.getNotes());
         } else {
             investment = Investment.builder()
                     .investorId(investorId)
                     .startupId(request.getStartupId())
                     .totalInvestedAmount(request.getAmount())
                     .ownershipPercentage(request.getOwnershipPercentage())
+                    .currency(request.getCurrency())
+                    .stage(request.getStage())
+                    .investmentDate(request.getInvestmentDate())
+                    .valuationAtInvestment(request.getValuationAtInvestment())
+                    .notes(request.getNotes())
                     .build();
         }
 
@@ -112,17 +122,20 @@ public class InvestmentService {
             return PortfolioCompanyDTO.builder()
                     .startupId(startup.getId())
                     .startupName(startup.getStartupName())
-                    .industry(startup.getSector() != null ? startup.getSector().name() : "Unknown")
-                    .teamSize(startup.getTeamSize())
-                    .foundedYear(foundedYear)
-                    .stage(startup.getStage())
-                    .status("Active") // Hardcoded for now
+                    .startupIndustry(startup.getSector() != null ? startup.getSector().name() : "Unknown")
+                    .startupTeamSize(startup.getTeamSize())
+                    .startupFoundedYear(foundedYear)
+                    .startupMrr(round(currentMrr))
+                    .startupGrowthPercentage(round(growth))
+
                     .investmentAmount(round(investment.getTotalInvestedAmount()))
-                    .ownershipPercentage(round(investment.getOwnershipPercentage()))
-                    .valuation(round(startup.getValuation()))
-                    .mrr(round(currentMrr))
-                    .growthPercentage(round(growth))
-                    .lastUpdate(lastUpdate)
+                    .investmentOwnershipPercentage(round(investment.getOwnershipPercentage()))
+                    .investmentCurrency(investment.getCurrency())
+                    .investmentStage(investment.getStage())
+                    .investmentDate(investment.getInvestmentDate())
+                    .valuationAtInvestment(round(investment.getValuationAtInvestment()))
+                    .investmentNotes(investment.getNotes())
+                    .investmentLastUpdate(lastUpdate)
                     .build();
         }).filter(java.util.Objects::nonNull).collect(Collectors.toList());
     }
@@ -142,10 +155,11 @@ public class InvestmentService {
         // Portfolio Value = Sum of (Valuation * (Ownership / 100))
         double portfolioValue = portfolio.stream()
                 .mapToDouble(
-                        p -> (p.getValuation() != null ? p.getValuation() : 0.0) * (p.getOwnershipPercentage() / 100.0))
+                        p -> (p.getValuationAtInvestment() != null ? p.getValuationAtInvestment() : 0.0)
+                                * (p.getInvestmentOwnershipPercentage() / 100.0))
                 .sum();
 
-        double avgGrowth = portfolio.stream().mapToDouble(PortfolioCompanyDTO::getGrowthPercentage).average()
+        double avgGrowth = portfolio.stream().mapToDouble(PortfolioCompanyDTO::getStartupGrowthPercentage).average()
                 .orElse(0.0);
 
         return PortfolioDashboardDTO.builder()

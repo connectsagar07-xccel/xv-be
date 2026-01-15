@@ -27,6 +27,12 @@ public class Investment {
     private Double totalInvestedAmount;
     private Double ownershipPercentage;
 
+    private String currency;
+    private String stage;
+    private java.time.LocalDate investmentDate;
+    private Double valuationAtInvestment;
+    private String notes;
+
     @CreatedDate
     private Instant createdAt;
 
