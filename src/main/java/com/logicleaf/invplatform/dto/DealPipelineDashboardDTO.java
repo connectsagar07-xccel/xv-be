@@ -13,5 +13,5 @@ public class DealPipelineDashboardDTO {
     private long totalPipeline;
     private long starredDeals;
     private long hotDeals;
-    private String totalValue;
+    private Double totalValue;
 }

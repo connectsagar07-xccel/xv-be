@@ -18,8 +18,8 @@ public class DealPipelineDTO {
     private String startupName;
     private String industry;
     private String stage;
-    private String valuation;
-    private String funding;
+    private Double valuation;
+    private Double funding;
     private DealStatus dealStatus;
     private String status;
     private String lastActivity;

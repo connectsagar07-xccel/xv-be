@@ -132,19 +132,19 @@ public class DealPipelineService {
                 .totalPipeline(totalPipeline)
                 .starredDeals(starredDeals)
                 .hotDeals(hotDeals)
-                .totalValue("₹" + totalFunding)
+                .totalValue(totalFunding)
                 .build();
     }
 
     private DealPipelineDTO mapToDTO(DealPipeline pipeline, Startup startup) {
         String lastActivity = "N/A";
-        String valuation = "N/A";
+        Double valuation = null;
         Integer teamSize = null;
 
         if (startup != null) {
             // Get valuation
             if (startup.getValuation() != null) {
-                valuation = "₹" + startup.getValuation();
+                valuation = startup.getValuation();
             }
             teamSize = startup.getTeamSize();
 
@@ -178,12 +178,12 @@ public class DealPipelineService {
             builder.startupName(startup.getStartupName())
                     .industry(startup.getSector() != null ? startup.getSector().name() : "Unknown")
                     .stage(startup.getStage())
-                    .funding(startup.getFundingRaised() != null ? "₹" + startup.getFundingRaised() : "₹0");
+                    .funding(startup.getFundingRaised() != null ? startup.getFundingRaised() : 0.0);
         } else {
             builder.startupName("Unknown Startup")
                     .industry("Unknown")
                     .stage("Seed")
-                    .funding("₹0");
+                    .funding(0.0);
         }
 
         return builder.build();
