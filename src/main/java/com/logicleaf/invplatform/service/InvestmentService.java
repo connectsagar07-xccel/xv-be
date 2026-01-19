@@ -156,11 +156,12 @@ public class InvestmentService {
         double totalInvested = portfolio.stream().mapToDouble(PortfolioCompanyDTO::getInvestmentAmount).sum();
 
         // Portfolio Value = Sum of (Valuation * (Ownership / 100))
-        double portfolioValue = portfolio.stream()
-                .mapToDouble(
-                        p -> (p.getValuationAtInvestment() != null ? p.getValuationAtInvestment() : 0.0)
-                                * (p.getInvestmentOwnershipPercentage() / 100.0))
-                .sum();
+        // double portfolioValue = portfolio.stream()
+        // .mapToDouble(
+        // p -> (p.getValuationAtInvestment() != null ? p.getValuationAtInvestment() :
+        // 0.0)
+        // * (p.getInvestmentOwnershipPercentage() / 100.0))
+        // .sum();
 
         double avgGrowth = portfolio.stream().mapToDouble(PortfolioCompanyDTO::getStartupGrowthPercentage).average()
                 .orElse(0.0);
@@ -168,7 +169,7 @@ public class InvestmentService {
         return PortfolioDashboardDTO.builder()
                 .totalCompanies(totalCompanies)
                 .totalInvested(totalInvested)
-                .portfolioValue(portfolioValue)
+                .portfolioValue(0d)
                 .avgGrowth(avgGrowth)
                 .build();
     }
